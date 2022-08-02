@@ -1,4 +1,4 @@
-package com.mejia.HelloInternet;
+package com.mejia.helloInternet;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
