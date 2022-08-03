@@ -23,6 +23,6 @@ public class NasaController {
     // Fourth step is to make a request route that allows you to change the date of the APOD information being requested. You’ll need to use either @PathVariable or @RequestParam, either will work.
     @GetMapping("/{date}")
     private void getByDate(@RequestParam String date) {
-
+        return;
     }
 }
