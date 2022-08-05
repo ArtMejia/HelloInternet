@@ -14,6 +14,7 @@ public class NasaController {
     private final String myNasaKey = "fJmhvO9ivjLyd74qGI9eRnlKtbJ2P3mAPoMNElaG";
     private final String nasaApodEndpoint = "https://api.nasa.gov/planetary/apod?api_key=" + myNasaKey;
 
+
     // Third step is to add a route handler to your code.
     @GetMapping("/apod")
     public Object apodHandler (RestTemplate restTemplate) {
@@ -21,8 +22,8 @@ public class NasaController {
     }
 
     // Fourth step is to make a request route that allows you to change the date of the APOD information being requested. You’ll need to use either @PathVariable or @RequestParam, either will work.
-    @GetMapping("/{date}")
-    private void getByDate(@RequestParam String date) {
-        return;
-    }
+//    @GetMapping("/{date}")
+//    private void getByDate(@RequestParam String date) {
+//        return;
+//    }
 }
