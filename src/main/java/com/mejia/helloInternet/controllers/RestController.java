@@ -1,5 +1,7 @@
 package com.mejia.helloInternet.controllers;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Random;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -65,6 +67,12 @@ public class RestController {
                 "Dear Math, grow up and solve your own problems."
         };
         return jokes[id];
+    }
+
+    @GetMapping("/pic")
+    private URL pic() throws MalformedURLException {
+        URL imageURL = new URL("https://ashleyfurniture.scene7.com/is/image/AshleyFurniture/A600009156_1?$AFHS-PDP-Zoomed$");
+        return imageURL;
     }
 
 }
