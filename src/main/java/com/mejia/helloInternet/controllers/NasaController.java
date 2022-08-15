@@ -11,21 +11,21 @@ import org.springframework.web.client.RestTemplate;
 
 // // First step is to add the RestController and RequestMapping annotations to the NasaController class
 @RestController
-@RequestMapping("/nasa")
+@RequestMapping("/api/nasa")
 public class NasaController {
 
     @Autowired
     private Environment env;
     // Second step is to create a nasaApodEndpoint field within your new class.
-    private final String myNasaKey = "fJmhvO9ivjLyd74qGI9eRnlKtbJ2P3mAPoMNElaG";
-    private final String nasaApodEndpoint = "https://api.nasa.gov/planetary/apod?api_key=" + myNasaKey;
+    private final String nasaApodEndpoint = "https://api.nasa.gov/planetary/apod?api_key=";
 
 
     // Third step is to add a route handler to your code.
     @GetMapping("/apod")
     public ResponseEntity<?> apodHandler (RestTemplate restTemplate) {
         try {
-            NasaModel response = restTemplate.getForObject(nasaApodEndpoint, NasaModel.class);
+            String url = nasaApodEndpoint + env.getProperty("NASA_KEY");
+            NasaModel response = restTemplate.getForObject(url, NasaModel.class);
 
             return ResponseEntity.ok(response);
 
@@ -38,15 +38,13 @@ public class NasaController {
     }
 
     @GetMapping("/{date}")
-    public ResponseEntity<?> getUserById (RestTemplate restTemplate, @PathVariable String date) {
+    public ResponseEntity<?> getApodByDate (RestTemplate restTemplate, @PathVariable String date) {
         try {
 
-            // throws NumberFormatException if id is not an int
-            Integer.parseInt(date);
 
             System.out.println("Getting user with date " + date);
 
-            String url = nasaApodEndpoint + "/" + date;
+            String url = nasaApodEndpoint + env.getProperty("NASA_KEY") + "&date=" + date;
 
             NasaModel response = restTemplate.getForObject(url, NasaModel.class);
 
@@ -57,6 +55,10 @@ public class NasaController {
 
         } catch (HttpClientErrorException.NotFound e) {
             return ResponseEntity.status(404).body("Photo Not Found With Date: " + date);
+
+        } catch (HttpClientErrorException.BadRequest e) {
+            return ResponseEntity.status(400).body("Date Provided Is Not Valid: " + date);
+
 
         } catch (Exception e) {
             System.out.println(e.getClass());
