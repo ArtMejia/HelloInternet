@@ -9,6 +9,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 // // First step is to add the RestController and RequestMapping annotations to the NasaController class
 @RestController
 @RequestMapping("/api/nasa")
@@ -24,10 +27,15 @@ public class NasaController {
     @GetMapping("/apod")
     public ResponseEntity<?> apodHandler (RestTemplate restTemplate) {
         try {
-            String url = nasaApodEndpoint + env.getProperty("NASA_KEY");
+            String key = env.getProperty("NASA_KEY");
+
+            String url = nasaApodEndpoint + key;
             NasaModel response = restTemplate.getForObject(url, NasaModel.class);
 
             return ResponseEntity.ok(response);
+
+        } catch (HttpClientErrorException.Forbidden e) {
+            return ResponseEntity.status(500).body("Server has no API key or API key is invalid");
 
         } catch (Exception e) {
             System.out.println(e.getClass());
@@ -38,13 +46,47 @@ public class NasaController {
     }
 
     @GetMapping("/{date}")
-    public ResponseEntity<?> getApodByDate (RestTemplate restTemplate, @PathVariable String date) {
+    public ResponseEntity<?> getApodByDatePV (RestTemplate restTemplate, @PathVariable String date) {
         try {
-
+            String key = env.getProperty("NASA_KEY");
 
             System.out.println("Getting user with date " + date);
 
-            String url = nasaApodEndpoint + env.getProperty("NASA_KEY") + "&date=" + date;
+            String url = nasaApodEndpoint + key + "&date=" + date;
+
+            NasaModel response = restTemplate.getForObject(url, NasaModel.class);
+
+            return ResponseEntity.ok(response);
+
+        } catch (HttpClientErrorException.BadRequest e) {
+            System.out.println(extractNasaErrorMsg(e.getMessage()));
+            return ResponseEntity.badRequest().body("Date Provided Is Not Valid: " + date);
+
+        } catch (HttpClientErrorException.Forbidden e) {
+            return ResponseEntity.status(500).body("Server has no API key or API key is invalid");
+
+        } catch (HttpClientErrorException.NotFound e) {
+            return ResponseEntity.status(404).body("Photo Not Found With Date: " + date);
+
+        } catch (NumberFormatException e) {
+            return ResponseEntity.status(400).body("Date " + date + ", is not a valid date. Must be a date");
+
+        } catch (Exception e) {
+            System.out.println(e.getClass());
+            System.out.println(e.getMessage());
+            return ResponseEntity.internalServerError().body(e.getMessage());
+        }
+
+    }
+
+    @GetMapping("/bydate")
+    public ResponseEntity<?> getApodByDateRP (RestTemplate restTemplate, @RequestParam () String date) {
+        try {
+            String key = env.getProperty("NASA_KEY");
+
+            System.out.println("Getting user with date " + date);
+
+            String url = nasaApodEndpoint + key + "&date=" + date;
 
             NasaModel response = restTemplate.getForObject(url, NasaModel.class);
 
@@ -65,12 +107,11 @@ public class NasaController {
             System.out.println(e.getMessage());
             return ResponseEntity.internalServerError().body(e.getMessage());
         }
-
     }
 
-    // Fourth step is to make a request route that allows you to change the date of the APOD information being requested. You’ll need to use either @PathVariable or @RequestParam, either will work.
-//    @GetMapping("/{date}")
-//    private void getByDate(@RequestParam String date) {
-//        return;
-//    }
+    private String extractNasaErrorMsg (String fullErrMsg) {
+        ArrayList<String> splitErrMsg = (ArrayList<String>) Arrays.stream(fullErrMsg.split("\"")).toList();
+        int msgindex = splitErrMsg.indexOf("msg") + 2;
+        return splitErrMsg.get(msgindex);
+    }
 }
