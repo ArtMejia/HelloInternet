@@ -2,6 +2,7 @@ package com.mejia.helloInternet.controllers;
 
 import com.mejia.helloInternet.models.NasaModel;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,9 +21,17 @@ public class NasaController {
     @Autowired
     private Environment env;
     // Second step is to create a nasaApodEndpoint field within your new class.
+
+
+    @Value("${NASA_KEY}")
+    private String apiKey;
+
+    @GetMapping("/testKey")
+    private String getApiKey () {
+        return apiKey;
+    }
+
     private final String nasaApodEndpoint = "https://api.nasa.gov/planetary/apod?api_key=";
-
-
     // Third step is to add a route handler to your code.
     @GetMapping("/apod")
     public ResponseEntity<?> apodHandler (RestTemplate restTemplate) {
