@@ -26,10 +26,10 @@ public class NasaController {
     @Value("${NASA_KEY}")
     private String apiKey;
 
-    @GetMapping("/testKey")
-    private String getApiKey () {
-        return apiKey;
-    }
+//    @GetMapping("/testKey")
+//    private String getApiKey () {
+//        return apiKey;
+//    }
 
     private final String nasaApodEndpoint = "https://api.nasa.gov/planetary/apod?api_key=";
     // Third step is to add a route handler to your code.
