@@ -26,10 +26,10 @@ public class NasaController {
     @Value("${NASA_KEY}")
     private String apiKey;
 
-//    @GetMapping("/testKey")
-//    private String getApiKey () {
-//        return apiKey;
-//    }
+    @GetMapping("/testKey")
+    private String getApiKey () {
+        return apiKey;
+    }
 
     private final String nasaApodEndpoint = "https://api.nasa.gov/planetary/apod?api_key=";
     // Third step is to add a route handler to your code.
@@ -38,7 +38,7 @@ public class NasaController {
         try {
             String key = env.getProperty("NASA_KEY");
 
-            String url = nasaApodEndpoint + key;
+            String url = nasaApodEndpoint + apiKey;
             NasaModel response = restTemplate.getForObject(url, NasaModel.class);
 
             return ResponseEntity.ok(response);
@@ -61,15 +61,18 @@ public class NasaController {
 
             System.out.println("Getting user with date " + date);
 
-            String url = nasaApodEndpoint + key + "&date=" + date;
+            String url = nasaApodEndpoint + apiKey + "&date=" + date;
 
             NasaModel response = restTemplate.getForObject(url, NasaModel.class);
 
             return ResponseEntity.ok(response);
 
         } catch (HttpClientErrorException.BadRequest e) {
-            System.out.println(extractNasaErrorMsg(e.getMessage()));
-            return ResponseEntity.badRequest().body("Date Provided Is Not Valid: " + date);
+            String rawErr = e.getMessage() != null ? e.getMessage() : "";
+            String apiErrMsg = extractNasaErrorMsg(rawErr);
+
+            return ResponseEntity.badRequest().body("Invalid Date Provided: " + date + "\n" + apiErrMsg);
+
 
         } catch (HttpClientErrorException.Forbidden e) {
             return ResponseEntity.status(500).body("Server has no API key or API key is invalid");
@@ -95,7 +98,7 @@ public class NasaController {
 
             System.out.println("Getting user with date " + date);
 
-            String url = nasaApodEndpoint + key + "&date=" + date;
+            String url = nasaApodEndpoint + apiKey + "&date=" + date;
 
             NasaModel response = restTemplate.getForObject(url, NasaModel.class);
 
@@ -119,8 +122,13 @@ public class NasaController {
     }
 
     private String extractNasaErrorMsg (String fullErrMsg) {
-        ArrayList<String> splitErrMsg = (ArrayList<String>) Arrays.stream(fullErrMsg.split("\"")).toList();
-        int msgindex = splitErrMsg.indexOf("msg") + 2;
-        return splitErrMsg.get(msgindex);
+        String[] splitErrMsg = fullErrMsg.split("\"");
+        for (int i = 0; i < splitErrMsg.length; i++) {
+            if (splitErrMsg[i].equals("msg") && i+2 < splitErrMsg.length) {
+                return splitErrMsg[i+2];
+            }
+        }
+        return "Error: no more info available";
+
     }
 }
