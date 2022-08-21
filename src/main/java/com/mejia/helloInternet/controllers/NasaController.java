@@ -13,16 +13,18 @@ import org.springframework.web.client.RestTemplate;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-// // First step is to add the RestController and RequestMapping annotations to the NasaController class
 @RestController
 @RequestMapping("/api/nasa")
 public class NasaController {
 
+    /*
+    Option 1 for accessing env vars from app.props
     @Autowired
     private Environment env;
-    // Second step is to create a nasaApodEndpoint field within your new class.
+     */
 
 
+//    Option 2 for accessing env vars from app.props
     @Value("${NASA_KEY}")
     private String apiKey;
 
@@ -32,11 +34,10 @@ public class NasaController {
     }
 
     private final String nasaApodEndpoint = "https://api.nasa.gov/planetary/apod?api_key=";
-    // Third step is to add a route handler to your code.
     @GetMapping("/apod")
     public ResponseEntity<?> apodHandler (RestTemplate restTemplate) {
         try {
-            String key = env.getProperty("NASA_KEY");
+//            String key = env.getProperty("NASA_KEY");
 
             String url = nasaApodEndpoint + apiKey;
             NasaModel response = restTemplate.getForObject(url, NasaModel.class);
@@ -51,13 +52,12 @@ public class NasaController {
             System.out.println(e.getMessage());
             return ResponseEntity.internalServerError().body(e.getMessage());
         }
-
     }
 
     @GetMapping("/{date}")
     public ResponseEntity<?> getApodByDatePV (RestTemplate restTemplate, @PathVariable String date) {
         try {
-            String key = env.getProperty("NASA_KEY");
+//            String key = env.getProperty("NASA_KEY");
 
             System.out.println("Getting user with date " + date);
 
@@ -88,13 +88,12 @@ public class NasaController {
             System.out.println(e.getMessage());
             return ResponseEntity.internalServerError().body(e.getMessage());
         }
-
     }
 
     @GetMapping("/bydate")
     public ResponseEntity<?> getApodByDateRP (RestTemplate restTemplate, @RequestParam () String date) {
         try {
-            String key = env.getProperty("NASA_KEY");
+//            String key = env.getProperty("NASA_KEY");
 
             System.out.println("Getting user with date " + date);
 
@@ -113,7 +112,6 @@ public class NasaController {
         } catch (HttpClientErrorException.BadRequest e) {
             return ResponseEntity.status(400).body("Date Provided Is Not Valid: " + date);
 
-
         } catch (Exception e) {
             System.out.println(e.getClass());
             System.out.println(e.getMessage());
@@ -129,6 +127,5 @@ public class NasaController {
             }
         }
         return "Error: no more info available";
-
     }
 }
